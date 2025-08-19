@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dlclark/regexp2"
+
 	_ "github.com/lib/pq"
 )
 
@@ -21,10 +23,12 @@ var (
 )
 
 var (
-	dbHost = os.Getenv("DATABASE_HOST")
-	dbPort = os.Getenv("DATABASE_PORT")
-	dbName = os.Getenv("DATABASE_NAME")
-	appEnv = os.Getenv("APP_ENV")
+	dbHost         = os.Getenv("DATABASE_HOST")
+	dbPort         = os.Getenv("DATABASE_PORT")
+	dbName         = os.Getenv("DATABASE_NAME")
+	appEnv         = os.Getenv("APP_ENV")
+	newPassRegex   = regexp2.MustCompile(os.Getenv("NEW_PASSWORD_REGEX"), 0)
+	newPassReqDesc = os.Getenv("NEW_PASSWORD_REQUIREMENT_DESCRIPTION")
 )
 
 func main() {
@@ -43,6 +47,20 @@ func main() {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 		newPassword := r.FormValue("new_password")
+
+		if newPassword == password {
+			messageTpl.Execute(w, map[string]string{
+				"Error": "New password cannot be the same as the current password.",
+			})
+			return
+		}
+
+		if m, _ := newPassRegex.MatchString(newPassword); !m {
+			messageTpl.Execute(w, map[string]string{
+				"Error": "New password does not meet the requirements: " + newPassReqDesc,
+			})
+			return
+		}
 
 		connStr := fmt.Sprintf("host=%s port=%s  dbname=%s  user=%s password=%s sslmode=disable", dbHost, dbPort, dbName, username, password)
 		db, err := sql.Open("postgres", connStr)
