@@ -23,12 +23,12 @@ var (
 )
 
 var (
-	dbHost         = os.Getenv("DATABASE_HOST")
-	dbPort         = os.Getenv("DATABASE_PORT")
-	dbName         = os.Getenv("DATABASE_NAME")
-	appEnv         = os.Getenv("APP_ENV")
-	newPassRegex   = regexp2.MustCompile(os.Getenv("NEW_PASSWORD_REGEX"), 0)
-	newPassReqDesc = os.Getenv("NEW_PASSWORD_REQUIREMENT_DESCRIPTION")
+	dbHost           = os.Getenv("DATABASE_HOST")
+	dbPort           = os.Getenv("DATABASE_PORT")
+	dbName           = os.Getenv("DATABASE_NAME")
+	appEnv           = os.Getenv("APP_ENV")
+	newPassRegex     = regexp2.MustCompile(os.Getenv("NEW_PASSWORD_REGEX"), 0)
+	newPassRegexDesc = os.Getenv("NEW_PASSWORD_REGEX_DESCRIPTION")
 )
 
 func main() {
@@ -57,7 +57,7 @@ func main() {
 
 		if m, _ := newPassRegex.MatchString(newPassword); !m {
 			messageTpl.Execute(w, map[string]string{
-				"Error": "New password does not meet the requirements: " + newPassReqDesc,
+				"Error": "New password does not meet the requirements: " + newPassRegexDesc,
 			})
 			return
 		}

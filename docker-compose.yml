@@ -26,6 +26,8 @@ services:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_NAME: empty
+      NEW_PASSWORD_REGEX: ^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,20}$
+      NEW_PASSWORD_REGEX_DESCRIPTION: Password must be at least 8 characters long but less than equal 20 long and contain at least one lowercase letter, one uppercase letter, one number, and one special character
     ports:
       - "8080:8080"
 
