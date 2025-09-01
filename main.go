@@ -5,7 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -65,6 +65,7 @@ func main() {
 		connStr := fmt.Sprintf("host=%s port=%s  dbname=%s  user=%s password=%s sslmode=disable", dbHost, dbPort, dbName, username, password)
 		db, err := sql.Open("postgres", connStr)
 		if err != nil {
+			slog.Default().Error("DB connection failed", "username", username, "error", err)
 			messageTpl.Execute(w, map[string]string{
 				"Error": "DB connection failed: " + err.Error(),
 			})
@@ -74,17 +75,19 @@ func main() {
 
 		_, err = db.Exec(fmt.Sprintf(`ALTER USER "%s" WITH PASSWORD '%s'`, username, newPassword))
 		if err != nil {
+			slog.Default().Error("Password change failed", "username", username, "error", err)
 			messageTpl.Execute(w, map[string]string{
 				"Error": "Password change failed: " + err.Error(),
 			})
 			return
 		}
 
+		slog.Default().Info("Password changed successfully", "username", username)
 		messageTpl.Execute(w, map[string]string{
 			"Message": "Password changed successfully!",
 		})
 	})
 
-	log.Println("Server started at :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	slog.Default().Info("Server started at :8080")
+	slog.Default().Error("Server error", "error", http.ListenAndServe(":8080", nil))
 }
