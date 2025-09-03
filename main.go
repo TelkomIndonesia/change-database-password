@@ -11,6 +11,7 @@ import (
 
 	"github.com/dlclark/regexp2"
 
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -73,7 +74,7 @@ func main() {
 		}
 		defer db.Close()
 
-		_, err = db.Exec(fmt.Sprintf(`ALTER USER "%s" WITH PASSWORD '%s'`, username, newPassword))
+		_, err = db.Exec(fmt.Sprintf(`ALTER USER %s WITH PASSWORD %s`, pq.QuoteIdentifier(username), pq.QuoteLiteral(newPassword)))
 		if err != nil {
 			slog.Default().Error("Password change failed", "username", username, "error", err)
 			messageTpl.Execute(w, map[string]string{
